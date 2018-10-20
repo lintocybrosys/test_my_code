@@ -9,7 +9,8 @@
     'version': '11.0.1.0.0',
     'depends': [
         'base',
-        'web_tour'
+        'web_tour',
+        'fieldservice'
     ],
     'data': [
         'security/res_groups.xml',
