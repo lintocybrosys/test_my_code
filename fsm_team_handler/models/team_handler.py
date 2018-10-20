@@ -19,17 +19,14 @@ class TeamsFSM(models.Model):
                                     string="Basic Skills"
                                     )
     team_avail = fields.Selection([('ordinary', 'Ordinary'),
-                                   ('express', 'Express')],
-                                  default='ordinary',
-                                  string="Team Availability"
-                                  )
+                                   ('express', 'Express')
+                                   ], default='ordinary',
+                                  string="Team Availability")
     team_lead = fields.Many2one('fsm.person',
                                 string="Team Leader",
                                 required=True
                                 )
-    minimum_size = fields.Integer(string="Minimum-size",
-                                  default=0
-                                  )
+    minimum_size = fields.Integer(string="Minimum-size", default=0)
     maximum_size = fields.Integer(string="Maximum-size",
                                   default=1
                                   )
@@ -50,8 +47,8 @@ class TeamsFSM(models.Model):
             raise exceptions.Warning(_("Minimum "
                                        "number of members"
                                        " not satisfied !"))
-        if self.team_members and \
-                        len(self.team_members) > self.maximum_size:
+        if self.team_members \
+                and len(self.team_members) > self.maximum_size:
             # comparing the number of members
             # and maximum no. of members allowed
             raise exceptions.Warning(_("Maximum number"
@@ -110,8 +107,8 @@ class TeamsFSM(models.Model):
                 # case: team leader(dispatcher)
                 # selecting the teams where
                 # this employee is the leader or member
-                teams = user.fsm_team_ids and\
-                        user.fsm_team_ids.ids or []
+                teams = \
+                    user.fsm_team_ids and user.fsm_team_ids.ids or []
 
                 domain = "[('id', 'in', " + str(teams) + ")]"
             elif persons and user.has_group('fieldservice.group_fsm_user'):
@@ -147,19 +144,22 @@ class TeamsFSM(models.Model):
         person_obj = self.env['fsm.person']
         if vals.get('team_lead'):
             old_person = self.team_lead
-            old_user = user_obj.search([
-                ('partner_id', '=', old_person.partner_id.id)],
+            old_user = \
+                user_obj.search([
+                    ('partner_id', '=', old_person.partner_id.id)],
                     limit=1
-            )
+                )
             if old_user:
                 # linked to a user
                 # we need to remove old team lead's team
                 if old_user.fsm_team_ids:
                     old_user.write({'fsm_team_ids': [(3, self.id)]})
             new_person = person_obj.browse(vals.get('team_lead'))
-            new_user = user_obj.search([
-                ('partner_id', '=', new_person.partner_id.id)],
-                    limit=1)
+            new_user = \
+                user_obj.search([
+                    ('partner_id', '=', new_person.partner_id.id)],
+                    limit=1
+                )
             if new_user:
                 # linked to a user
                 new_user.write({'fsm_team_ids': [(4, self.id)]})\
@@ -169,9 +169,11 @@ class TeamsFSM(models.Model):
                 if i[2] and i[0] == 0:
                     # adding a new member
                     person = person_obj.browse(i[2].get('name'))
-                    user = user_obj.search([
-                        ('partner_id', '=', person.partner_id.id)],
-                            limit=1)
+                    user = \
+                        user_obj.search([
+                            ('partner_id', '=', person.partner_id.id)],
+                            limit=1
+                        )
                     if user:
                         # linked to a user
                         user.write({
@@ -184,11 +186,13 @@ class TeamsFSM(models.Model):
                                "WHERE id=%s",
                                (i[1], ))
                     person_id = cr.fetchone()
-                    person = person_id and person_obj.browse(
-                            person_id[0]) or None
-                    user = user_obj.search([
-                        ('partner_id', '=', person.partner_id.id)],
-                            limit=1)
+                    person = \
+                        person_id and person_obj.browse(person_id[0]) or None
+                    user = \
+                        user_obj.search([
+                            ('partner_id', '=', person.partner_id.id)],
+                            limit=1
+                        )
                     if user:
                         # linked to a user
                         user and user.write({
@@ -201,11 +205,13 @@ class TeamsFSM(models.Model):
                                "WHERE id=%s",
                                (i[1],))
                     person_id = cr.fetchone()
-                    person = person_id and person_obj.browse(
-                            person_id[0]) or None
-                    user = user_obj.search([
-                        ('partner_id', '=', person.partner_id.id)],
-                            limit=1)
+                    person = \
+                        person_id and person_obj.browse(person_id[0]) or None
+                    user = \
+                        user_obj.search([
+                            ('partner_id', '=', person.partner_id.id)],
+                            limit=1
+                        )
                     if user:
                         # linked to a user
                         user and user.write({
@@ -213,9 +219,11 @@ class TeamsFSM(models.Model):
                         })
 
                     new_person = person_obj.browse(i[2].get('name'))
-                    new_user = user_obj.search([
-                        ('partner_id', '=', new_person.partner_id.id)],
-                            limit=1)
+                    new_user = \
+                        user_obj.search([
+                            ('partner_id', '=', new_person.partner_id.id)],
+                            limit=1
+                        )
                     if new_user:
                         # linked to a user
                         new_user and new_user.write({
@@ -228,20 +236,18 @@ class TeamsFSM(models.Model):
         required by the team, we will raise a warning"""
         team_skill_ids = self.basic_skills.ids
         if self.team_lead:
-            has_skill = self.validate_skills(
-                    team_skill_ids,
-                    self.team_lead.skill_ids.ids
-            )
+            has_skill = self.validate_skills(team_skill_ids,
+                                             self.team_lead.skill_ids.ids
+                                             )
             if not has_skill:
-                raise exceptions.Warning(_(
-                        "Team leader doesn't satisfy "
-                        "the basic skills criteria."
-                    ))
+                raise exceptions.Warning(_("Team leader"
+                                           " doesn't satisfy "
+                                           "the basic skills criteria."
+                                           ))
         for member in self.team_members:
-            has_skill = self.validate_skills(
-                    team_skill_ids,
-                    member.name.skill_ids.ids
-            )
+            has_skill = self.validate_skills(team_skill_ids,
+                                             member.name.skill_ids.ids
+                                             )
 
             if not has_skill:
                 # member doesn't have any of the skills required
@@ -265,9 +271,7 @@ class TeamsFSM(models.Model):
 class TeamTypeFSM(models.Model):
     _name = 'team.type'
 
-    name = fields.Char(
-            string="Type"
-    )
+    name = fields.Char(string="Type")
 
 
 class EmployeeFsmTeams(models.Model):

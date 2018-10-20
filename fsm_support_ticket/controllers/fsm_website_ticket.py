@@ -11,11 +11,14 @@ class SupportTicket(http.Controller):
             if request.env.user.name != 'Public user':
                 customer_name = request.env.user.name
 
+        if request.env.user:
+            email = request.env.user.partner_id.email
+        else:
+            email = ''
         values = {
             'ticket_categ': ticket_categ or [],
             'customer_name': customer_name,
-            'email': request.env.user and
-                     request.env.user.partner_id.email or '',
+            'email': email
         }
 
         return request.render("fsm_support_ticket.fs_tickets", values)
@@ -71,21 +74,19 @@ class SupportTicket(http.Controller):
 
         # enabling pager for tickets
         # (in case there will be a large number of tickets)
-        pager = request.website.pager(
-            url='/fsm/tickets/list',
-            total=tickets_count,
-            page=page,
-            step=30,
-        )
+        pager = request.website.pager(url='/fsm/tickets/list',
+                                      total=tickets_count,
+                                      page=page,
+                                      step=30
+                                      )
         tickets = tickets_obj.search(domain,
                                      offset=(page - 1) * 30,
                                      limit=30)
 
-        states = tickets_obj.fields_get(
-                allfields=['state'])['state']['selection']
+        states = tickets_obj.fields_get(allfields=['state'])
 
         return request.render("fsm_support_ticket.tickets_list", {
             'tickets': tickets,
             'pager': pager,
-            'states': states
+            'states': states['state']['selection']
         })

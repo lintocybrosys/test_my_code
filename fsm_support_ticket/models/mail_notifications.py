@@ -88,19 +88,23 @@ class MailNotification(models.Model):
         """This function will collect all the values provided
         in the wizard and sends mail to corresponding recipients."""
         mail_from = self.email_from
+        model_obj = self.env['ir.model.data']
         # collecting all the recipients, there may be multiple recipients
         email_str = ''
         if self.notify_type == 'customer':
-            template_id = self.env['ir.model.data'].get_object_reference(
-                    'fsm_support_ticket',
-                    'notify_customer_mail')[1]
+            template_id = \
+                model_obj.get_object_reference('fsm_support_ticket',
+                                               'notify_customer_mail'
+                                               )[1]
             for rec in self.recipient:
                 email_str += rec.email + "," if rec.email else ''
             email_str = email_str[:-1]
         else:
-            template_id = self.env['ir.model.data'].get_object_reference(
-                    'fsm_support_ticket',
-                    'notify_employee_mail')[1]
+
+            template_id = \
+                model_obj.get_object_reference('fsm_support_ticket',
+                                               'notify_employee_mail'
+                                               )[1]
             for rec in self.recipient_person:
                 email_str += rec.email + "," if rec.email else ''
             email_str = email_str[:-1]
@@ -181,10 +185,8 @@ class MailNotification(models.Model):
             # there is no channel for this partner and sender,
             # so we are creating a direct channel
             if create_channel:
-                channel_name = self.env[
-                                   'res.partner'
-                               ].browse(i).name + ", " \
-                                                  "" + user.partner_id.name
+                partner = self.env['res.partner'].browse(i)
+                channel_name = partner.name + ", " + user.partner_id.name
                 try:
                     channel_id = self.env['mail.channel'].create({
                         'name': channel_name,

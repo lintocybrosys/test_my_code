@@ -20,16 +20,12 @@ class SupportTicket(models.Model):
     person_id = fields.Many2one('fsm.person',
                                 string="Assigned Person"
                                 )
-    customer_name = fields.Char(
-            string='Person Name'
-    )
+    customer_name = fields.Char(string='Person Name')
     email = fields.Char(string="Email")
     ticket_date = fields.Date(string="Ticket Date",
                               default=fields.Date.today()
                               )
-    description = fields.Text(
-            string="Description"
-    )
+    description = fields.Text(string="Description")
     state = fields.Selection([('draft', 'Draft'),
                               ('sent_to_employee', 'Sent to Employee'),
                               ('processing', 'Processing'),
