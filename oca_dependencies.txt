@@ -1,1 +1,1 @@
-web_timeline
+web_timeline https://github.com/OCA/field-service 11.0
