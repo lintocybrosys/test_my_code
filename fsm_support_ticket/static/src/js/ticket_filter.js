@@ -1,4 +1,3 @@
-"use strict";
 $(document).ready(
     function () {
         $("#state_selection_el").select2();

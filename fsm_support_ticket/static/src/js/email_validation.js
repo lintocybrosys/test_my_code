@@ -1,4 +1,3 @@
-"use strict";
 $(document).ready(function () {
     $(".customer-email").change(function () {
         var email = $(this).val();
@@ -10,6 +9,6 @@ $(document).ready(function () {
         if (email && res === false) {
             alert("You have provided an invalid email.");
         }
-        return;
+        return ;
     });
 });
