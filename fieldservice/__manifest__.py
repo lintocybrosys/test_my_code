@@ -11,7 +11,7 @@
     'depends': [
         'base_geolocalize',
         'mail',
-        'web_timeline',
+        'https://www.odoo.com/apps/modules/11.0/web_timeline/',
     ],
     'data': [
         'data/ir_sequence.xml',
