@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
-import base64
-
-from odoo import http, SUPERUSER_ID
+from odoo import http
 from odoo.http import request
 
 
@@ -18,7 +14,8 @@ class SupportTicket(http.Controller):
         values = {
             'ticket_categ': ticket_categ or [],
             'customer_name': customer_name,
-            'email': request.env.user and request.env.user.partner_id.email or '',
+            'email': request.env.user and
+                     request.env.user.partner_id.email or '',
         }
 
         return request.render("fsm_support_ticket.fs_tickets", values)
@@ -58,7 +55,8 @@ class SupportTicket(http.Controller):
         user = request.env.user
         tickets_obj = request.env['fsm.support.ticket'].sudo()
         person_obj = request.env['fsm.person'].sudo()
-        person = person_obj.search([('partner_id', '=', user.partner_id.id)], limit=1)
+        person = person_obj.search([
+            ('partner_id', '=', user.partner_id.id)], limit=1)
         if person:
             domain = [
                 '|',
@@ -79,11 +77,12 @@ class SupportTicket(http.Controller):
             page=page,
             step=30,
         )
-        tickets = tickets_obj.search(
-                domain, offset=(page - 1) * 30,
-                limit=30)
+        tickets = tickets_obj.search(domain,
+                                     offset=(page - 1) * 30,
+                                     limit=30)
 
-        states = tickets_obj.fields_get(allfields=['state'])['state']['selection']
+        states = tickets_obj.fields_get(
+                allfields=['state'])['state']['selection']
 
         return request.render("fsm_support_ticket.tickets_list", {
             'tickets': tickets,

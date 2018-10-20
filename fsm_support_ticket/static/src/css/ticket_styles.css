@@ -50,11 +50,13 @@ textarea.ticket_website_form{
 }
 .tickets_table table tr{
     border-bottom: 1px groove;
+    height: 30px;
 }
 .tickets_table table th{
     border: 1px groove;
     text-align: center;
     background-color: #2e6da4;
+    color: whitesmoke;
 }
 .tickets_table table td{
     border: 1px groove;

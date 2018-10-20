@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 
 from odoo import api, exceptions, fields, models, _
@@ -10,19 +8,17 @@ _logger = logging.getLogger(__name__)
 class PartnerOperation(models.Model):
     _inherit = 'res.partner'
 
-    mail_compose_wiz = fields.Many2one(
-            'fsm.compose.mail',
-            string="Mail compose wizard"
-    )
+    mail_compose_wiz = fields.Many2one('fsm.compose.mail',
+                                       string="Mail compose wizard"
+                                       )
 
 
 class EmployeeOperation(models.Model):
     _inherit = 'fsm.person'
 
-    mail_compose_wiz = fields.Many2one(
-            'fsm.compose.mail',
-            string="Mail compose wizard"
-    )
+    mail_compose_wiz = fields.Many2one('fsm.compose.mail',
+                                       string="Mail compose wizard"
+                                       )
 
 
 # This model is used to create a wizard for composing mails to
@@ -30,38 +26,30 @@ class EmployeeOperation(models.Model):
 class MailNotification(models.Model):
     _name = 'fsm.compose.mail'
 
-    email_from = fields.Char(
-            string="From"
-    )
-    recipient = fields.One2many(
-            'res.partner',
-            'mail_compose_wiz',
-            string="Recipients"
-    )
-    recipient_person = fields.One2many(
-            'fsm.person',
-            'mail_compose_wiz',
-            string="Recipients"
-    )
-    subject = fields.Char(
-            string="Subject"
-    )
-    body = fields.Html(
-            string="Body"
-    )
+    email_from = fields.Char(string="From")
+    recipient = fields.One2many('res.partner',
+                                'mail_compose_wiz',
+                                string="Recipients"
+                                )
+    recipient_person = fields.One2many('fsm.person',
+                                       'mail_compose_wiz',
+                                       string="Recipients"
+                                       )
+    subject = fields.Char(string="Subject")
+    body = fields.Html(string="Body")
     notify_type = fields.Char()
 
     @api.onchange('notify_type')
     def onchange_notify_type(self):
-        """We will load the values for this model based on
-         the notify_type(customer or employee).
-        The default mail template and recipients list may change according to the
+        """
+        We will load the values for this model based on
+        the notify_type(customer or employee).
+        The default mail template and
+        recipients list may change according to the
         notify_type value.
         """
         notify_type = self._context.get('default_notify_type')
         # getting current ticket
-        ticket_id = None
-        ticket = None
         if self._context.get('active_model') == 'fsm.support.ticket':
             ticket_id = self._context.get('active_id')
             rec = self.env['fsm.support.ticket'].browse(ticket_id)
@@ -103,14 +91,16 @@ class MailNotification(models.Model):
         # collecting all the recipients, there may be multiple recipients
         email_str = ''
         if self.notify_type == 'customer':
-            template_id = self.env['ir.model.data'].get_object_reference('fsm_support_ticket',
-                                                                         'notify_customer_mail')[1]
+            template_id = self.env['ir.model.data'].get_object_reference(
+                    'fsm_support_ticket',
+                    'notify_customer_mail')[1]
             for rec in self.recipient:
                 email_str += rec.email + "," if rec.email else ''
             email_str = email_str[:-1]
         else:
-            template_id = self.env['ir.model.data'].get_object_reference('fsm_support_ticket',
-                                                                         'notify_employee_mail')[1]
+            template_id = self.env['ir.model.data'].get_object_reference(
+                    'fsm_support_ticket',
+                    'notify_employee_mail')[1]
             for rec in self.recipient_person:
                 email_str += rec.email + "," if rec.email else ''
             email_str = email_str[:-1]
@@ -138,14 +128,16 @@ class MailNotification(models.Model):
 
                     # getting current ticket
                     rec = None
-                    if self._context.get('active_model') == 'fsm.support.ticket':
+                    if self._context.get('active_model') == \
+                            'fsm.support.ticket':
                         ticket_id = self._context.get('active_id')
                         rec = self.env['fsm.support.ticket'].browse(ticket_id)
 
                     if rec:
                         rec.state = 'sent_to_employee'
 
-        # now we need to send notifications to all the recipients(private channel)
+        # now we need to send notifications to
+        # all the recipients(private channel)
         # so if there is no channel exists, we will create one
         # gathering all the partner details
         partner_ids = {}
@@ -163,7 +155,9 @@ class MailNotification(models.Model):
         cr = self._cr
         channel_partners = None
         if partner_ids.keys():
-            cr.execute("select partner_id,channel_id from mail_channel_partner where "
+            cr.execute("SELECT partner_id,channel_id "
+                       "FROM mail_channel_partner "
+                       "WHERE "
                        "partner_id in %s and channel_id is not null ",
                        (tuple(partner_ids.keys()), ))
             channel_partners = cr.dictfetchall()
@@ -187,19 +181,27 @@ class MailNotification(models.Model):
             # there is no channel for this partner and sender,
             # so we are creating a direct channel
             if create_channel:
+                channel_name = self.env[
+                                   'res.partner'
+                               ].browse(i).name + ", " \
+                                                  "" + user.partner_id.name
                 try:
                     channel_id = self.env['mail.channel'].create({
-                        'name': self.env['res.partner'].browse(i).name + ", " + user.partner_id.name,
+                        'name': channel_name,
                         'public': 'private',
                         'channel_type': 'chat',
-                        'channel_partner_ids': [(6, 0, [i, user.partner_id.id])]
+                        'channel_partner_ids': [
+                            (6, 0, [i, user.partner_id.id])]
                     })
-                    channels_to_update.append(channel_id.id) if channel_id else None
+                    channels_to_update.append(channel_id.id)\
+                        if channel_id else None
                 except Exception:
                     pass
 
-        # sending the message directly to the recipient channel
-        # here the channel is a direct channel which inludes the sender and recipient
+        # sending the message directly
+        # to the recipient channel
+        # here the channel is a direct channel
+        # which inludes the sender and recipient
         self.env['mail.message'].create({
             'message_type': 'notification',
             'body': self.body,

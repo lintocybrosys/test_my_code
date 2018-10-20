@@ -1,11 +1,7 @@
-# -*- coding: utf-8 -*-
 {
     'name': "FSM Support Tickets",
     'summary': """
         Handles support tickets.""",
-    'description': """
-        Manages tickets from website, creates order from tickets etc.
-    """,
     'author': "redO2oo.ch2",
     'website': "https://www.redo2oo.ch",
     'category': 'Field Service',

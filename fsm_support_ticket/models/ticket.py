@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from odoo import api, fields, models
 
 
@@ -16,32 +14,29 @@ class SupportTicket(models.Model):
         'fsm.ticket.category',
         string="Ticket Category"
     )
-    customer_id = fields.Many2one(
-            'res.partner',
-            string="Customer"
-    )
-    person_id = fields.Many2one(
-            'fsm.person',
-            string="Assigned Person"
-    )
+    customer_id = fields.Many2one('res.partner',
+                                  string="Customer"
+                                  )
+    person_id = fields.Many2one('fsm.person',
+                                string="Assigned Person"
+                                )
     customer_name = fields.Char(
             string='Person Name'
     )
     email = fields.Char(string="Email")
-    ticket_date = fields.Date(
-        string="Ticket Date",
-        default=fields.Date.today()
-    )
+    ticket_date = fields.Date(string="Ticket Date",
+                              default=fields.Date.today()
+                              )
     description = fields.Text(
             string="Description"
     )
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('sent_to_employee', 'Sent to Employee'),
-        ('processing', 'Processing'),
-        ('finished', 'Finished'),
-        ('cancelled', 'Cancelled')
-    ], string="State", default='draft')
+    state = fields.Selection([('draft', 'Draft'),
+                              ('sent_to_employee', 'Sent to Employee'),
+                              ('processing', 'Processing'),
+                              ('finished', 'Finished'),
+                              ('cancelled', 'Cancelled')
+                              ], string="State",
+                             default='draft')
 
     @api.onchange('customer_id')
     def onchange_person(self):

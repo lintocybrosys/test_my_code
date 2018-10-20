@@ -13,7 +13,7 @@
                 </p>]]>
               </field>
          </record>
-         <!--Template for emlpoyee notification -->
+         <!--Template for assigned person notification -->
          <record id="notify_employee_mail" model="mail.template">
               <field name="name">Example e-mail template</field>
               <field name="subject">Status</field>
