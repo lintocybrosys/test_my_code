@@ -184,8 +184,10 @@ class WorkSetsFSM(models.Model):
                 # case: team leader
                 # selecting the teams where
                 # this employee/person is the leader or member
-                teams = user.fsm_team_ids and \
-                            user.fsm_team_ids.ids or []
+                if user.fsm_team_ids:
+                    teams = user.fsm_team_ids.ids
+                else:
+                    teams = []
 
                 ids = []
                 if teams:
@@ -256,9 +258,8 @@ class WorkSetsFSM(models.Model):
             if workset.stage_set and workset.stage_set.stage_ids:
                 workset.work_started_flag = "False"
                 # sorting stages by sequence
-                stages = \
-                    workset.stage_set.stage_ids.sorted(key=
-                                                       lambda r: r.sequence)
+                stage_ids = workset.stage_set.stage_ids
+                stages = stage_ids.sorted(key=lambda r: r.sequence)
                 workset.next_stage = stages[0].stage_id.id
                 workset.state = stages[0].stage_id.name
                 # resetting the stages of child workitems, if there are any
