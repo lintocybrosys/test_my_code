@@ -32,9 +32,8 @@ class WorkSetForms(models.Model):
         Returns a tree view where we can answer the questions
         related to the current work-set and survey.
         """
-        view = self.env.ref(
-                'fsm_task_handler.product_survey_answer_editable_tree'
-        )
+        tree_id = 'fsm_task_handler.product_survey_answer_editable_tree'
+        view = self.env.ref(tree_id)
         return {
             'name': 'Answers',
             'type': 'ir.actions.act_window',
@@ -54,9 +53,7 @@ class WorkSetForms(models.Model):
         Returns all the questions & answers related to
         that survey(Non-editable, just for view).
         """
-        view = self.env.ref(
-                'fsm_task_handler.product_survey_answer_tree'
-        )
+        view = self.env.ref('fsm_task_handler.product_survey_answer_tree')
         return {
             'name': 'Answers',
             'type': 'ir.actions.act_window',

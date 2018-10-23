@@ -185,7 +185,7 @@ class WorkSetsFSM(models.Model):
                 # selecting the teams where
                 # this employee/person is the leader or member
                 teams = user.fsm_team_ids and \
-                        user.fsm_team_ids.ids or []
+                            user.fsm_team_ids.ids or []
 
                 ids = []
                 if teams:
@@ -233,9 +233,7 @@ class WorkSetsFSM(models.Model):
         stage_id = self.env['fsm.stages'].search([('name', '=', 'Approved')],
                                                  limit=1)
         if not stage_id:
-            stage_id = self.env['fsm.stages'].create({
-               'name': 'Approved'
-            })
+            stage_id = self.env['fsm.stages'].create({'name': 'Approved'})
         self.next_stage = stage_id.id
         self.state = stage_id.name
         return False
@@ -245,9 +243,7 @@ class WorkSetsFSM(models.Model):
         stage_id = self.env['fsm.stages'].search([('name', '=', 'Rejected')],
                                                  limit=1)
         if not stage_id:
-            stage_id = self.env['fsm.stages'].create({
-               'name': 'Rejected'
-            })
+            stage_id = self.env['fsm.stages'].create({'name': 'Rejected'})
         self.next_stage = stage_id.id
         self.state = stage_id.name
         return False
@@ -261,8 +257,8 @@ class WorkSetsFSM(models.Model):
                 workset.work_started_flag = "False"
                 # sorting stages by sequence
                 stages = \
-                    workset.stage_set.stage_ids.sorted(
-                            key=lambda r: r.sequence)
+                    workset.stage_set.stage_ids.sorted(key=
+                                                       lambda r: r.sequence)
                 workset.next_stage = stages[0].stage_id.id
                 workset.state = stages[0].stage_id.name
                 # resetting the stages of child workitems, if there are any

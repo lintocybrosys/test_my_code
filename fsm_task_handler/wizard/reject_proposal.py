@@ -10,8 +10,10 @@ class RejectProposal(models.Model):
         """Rejects the proposal assigned to the employee.
         This wizard can also be used with work order as well."""
         model = self._context.get('active_model')
+        workset_obj = self.env['fsm.work_set']
         if model == 'fsm.work_set':
-            rec = self.env['fsm.work_set'].browse(self._context.get('default_id'))
+            rec = \
+                workset_obj.browse(self._context.get('default_id'))
             if rec:
                 rec.reject_reason = self.reject_reason
                 rec.reject_operation()
