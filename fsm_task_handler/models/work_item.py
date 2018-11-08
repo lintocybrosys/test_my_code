@@ -351,7 +351,8 @@ class WorkItemFSM(models.Model):
         """To start the job"""
         for rec in self:
             if rec.work_set_id.work_started_flag != 'started':
-                raise exceptions.UserError(_('Parent work-set is not started !'))
+                raise exceptions.UserError(_('Parent'
+                                             ' work-set is not started !'))
             rec.status = 'ongoing'
 
     @api.multi
@@ -359,7 +360,8 @@ class WorkItemFSM(models.Model):
         """To finish the job"""
         for rec in self:
             rec.status = 'done'
-            # -after finishing the job, we have to start the next job immediatly
+            # -after finishing the job, we have to
+            # start the next job immediatly
             # for that, we are checking the parent workset is started or not
             # we will start the job only if the workset is started
             if rec.next_job_id and rec.next_job_id.work_set_id:
