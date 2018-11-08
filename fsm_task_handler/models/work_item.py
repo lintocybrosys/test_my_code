@@ -166,10 +166,10 @@ class WorkItemFSM(models.Model):
         if self.status == 'ongoing':
             # checking whether this work has the needed
             # number of employees or not
-            if not self.undermanned and \
-                            self.employees_needed > len(self.person_ids):
-                raise exceptions.Warning(_("Employees requirement "
-                                           "is not satisfied."))
+            if not self.undermanned:
+                if self.employees_needed > len(self.person_ids):
+                    raise exceptions.Warning(_("Employees requirement "
+                                               "is not satisfied."))
 
             # a team is selected
             team = self.team_id
