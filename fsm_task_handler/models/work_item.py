@@ -47,7 +47,7 @@ class WorkItemFSM(models.Model):
     hourly_cost = fields.Float(string="Hourly Cost")
     employees_needed = fields.Integer(string="No. of employees needed",
                                       default=1)
-    available_emp = fields.Char(compute='available_emp_count')
+    available_emp = fields.Char(compute='compute_available_emp_count')
     undermanned = fields.Boolean(string="Can be undermanned ",
                                  default=True)
 
@@ -57,9 +57,8 @@ class WorkItemFSM(models.Model):
     next_job_id = fields.Many2one('fsm.work_item',
                                   string="Next Work Item")
 
-    @api.one
     @api.depends('team_id')
-    def available_emp_count(self):
+    def compute_available_emp_count(self):
         """We are setting the number of
         available employees of the selected team from this function."""
         if not self.team_id:
@@ -195,7 +194,6 @@ class WorkItemFSM(models.Model):
                     raise exceptions.Warning(_("%s  have another job "
                                                "ongoing now !") %
                                              (emp_names[:-2]))
-                    return False
             # it is an ongoing job, so the employees are not available
             for person in self.person_ids:
                 person.available = False
@@ -239,7 +237,6 @@ class WorkItemFSM(models.Model):
                             raise exceptions.Warning(_("Employees cannot have"
                                                        " more than one "
                                                        "job at a time!"))
-                            return False
             # it is an ongoing job, so the employees are not available
             for employee in res.person_ids:
                 employee.available = False
@@ -349,23 +346,25 @@ class WorkItemFSM(models.Model):
         self.final_cost = final_cost
         return False
 
-    @api.one
+    @api.multi
     def start_job(self):
         """To start the job"""
-        if self.work_set_id.work_started_flag != 'started':
-            raise exceptions.UserError(_('Parent work-set is not started !'))
-        self.status = 'ongoing'
+        for rec in self:
+            if rec.work_set_id.work_started_flag != 'started':
+                raise exceptions.UserError(_('Parent work-set is not started !'))
+            rec.status = 'ongoing'
 
-    @api.one
+    @api.multi
     def finish_job(self):
         """To finish the job"""
-        self.status = 'done'
-        # -after finishing the job, we have to start the next job immediatly
-        # for that, we are checking the parent workset is started or not
-        # we will start the job only if the workset is started
-        if self.next_job_id and self.next_job_id.work_set_id:
-            if self.next_job_id.work_set_id.work_started_flag == 'started':
-                self.status = 'ongoing'
+        for rec in self:
+            rec.status = 'done'
+            # -after finishing the job, we have to start the next job immediatly
+            # for that, we are checking the parent workset is started or not
+            # we will start the job only if the workset is started
+            if rec.next_job_id and rec.next_job_id.work_set_id:
+                if rec.next_job_id.work_set_id.work_started_flag == 'started':
+                    rec.status = 'ongoing'
 
     @api.multi
     def reset_to_draft(self):
