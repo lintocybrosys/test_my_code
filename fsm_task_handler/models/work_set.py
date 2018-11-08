@@ -305,7 +305,8 @@ class WorkSetsFSM(models.Model):
                             has_permission = True
                     elif trans.name == 'Team Leader':
                         # fsm dispatcher(team lead) has permission
-                        # in this case, the leaders of the assigned team can change state
+                        # in this case, the leaders of the assigned team
+                        #  can change state
                         if user.has_group('fieldservice.group_fsm_dispatcher'):
                             # collecting the teams assigned to
                             # this record(work order / work set)
@@ -318,7 +319,8 @@ class WorkSetsFSM(models.Model):
                                 for u_team in user_team_ids:
                                     if u_team in rec_team_ids:
                                         # current user is a dispatcher
-                                        # and is member of one of the teams assigned
+                                        # and is member of one of the
+                                        # teams assigned
                                         #  to the current record
                                         has_permission = True
                                         break
@@ -342,8 +344,11 @@ class WorkSetsFSM(models.Model):
                     # condition is set
                     try:
                         result = safe_eval(selected_trans.validate_transition)
-                        validation_success = \
-                            self.validate_conditions(result) if result else False
+                        if result:
+                            validation_success = \
+                                self.validate_conditions(result)
+                        else:
+                            validation_success = False
                     except:
                         raise exceptions.Warning(_('Could not verify '
                                                    'the conditions specified '
@@ -353,14 +358,17 @@ class WorkSetsFSM(models.Model):
                         raise exceptions.Warning(_('Some conditions are '
                                                    'not met, you cannot '
                                                    'change the state !\n'
-                                                   'Please check the conditions '
-                                                   'associated with this stage.'))
+                                                   'Please check the '
+                                                   'conditions '
+                                                   'associated with '
+                                                   'this stage.'))
                 # --------VERIFY CONDITIONS ---------END
 
         # ---------ADVANCED TRANSITIONS -------- END
 
         # ---------NORMAL TRANSITIONS -------- start
-        # in this section, we will check that the current user is allowed to move
+        # in this section, we will check that
+        # the current user is allowed to move
         # records into the new stage or not.
         validation_success = True
         has_permission = False
@@ -373,7 +381,7 @@ class WorkSetsFSM(models.Model):
         elif stage_selected.role_admin:
             # only admin is allowed to change
             if user.id == 1:
-               has_permission = True
+                has_permission = True
         elif stage_selected.role_manager:
             # fsm manager has permission
             if user.has_group('fieldservice.group_fsm_manager'):

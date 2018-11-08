@@ -84,10 +84,11 @@ class WorkItemFSM(models.Model):
                 self.work_set_id.price_categ if self.work_set_id else None
         hourly_cost = 0
         if self.price_categ and self.skill_sets:
-            categ = self.env['service.categ.price'].search(
-                    [('skill_id', '=', self.skill_sets.id),
-                     ('name', '=', self.price_categ.title())], limit=1
-            )
+            categ_price = self.env['service.categ.price']
+            categ = \
+                categ_price.search([('skill_id', '=', self.skill_sets.id),
+                                    ('name', '=', self.price_categ.title())
+                                    ], limit=1)
             hourly_cost += categ and categ.cost or 0
         self.hourly_cost = hourly_cost
         domain = None
@@ -132,11 +133,6 @@ class WorkItemFSM(models.Model):
             }
         }
 
-    # @api.onchange('person_ids')
-    # def onchange_employees(self):
-    #     for emp in self.person_ids:
-    #         emp.available = False
-
     @api.onchange('skill_sets')
     def onchange_skill_sets(self):
         """skill_id
@@ -154,7 +150,8 @@ class WorkItemFSM(models.Model):
             for team in all_teams:
                 for i in skill_ids:
                     if i in team.basic_skills.ids:
-                        team_list.append(team.id) if team.id not in team_list else None
+                        team_list.append(team.id)\
+                            if team.id not in team_list else None
             domain = "[('id', 'in'," + str(team_list) + ")]"
         return {
             'domain': {
@@ -167,10 +164,12 @@ class WorkItemFSM(models.Model):
         result = super(WorkItemFSM, self).write(vals)
 
         if self.status == 'ongoing':
-            # checking whether this work has the needed number of employees or not
+            # checking whether this work has the needed
+            # number of employees or not
             if not self.undermanned and \
                             self.employees_needed > len(self.person_ids):
-                raise exceptions.Warning(_("Employees requirement is not satisfied."))
+                raise exceptions.Warning(_("Employees requirement "
+                                           "is not satisfied."))
 
             # a team is selected
             team = self.team_id
@@ -323,17 +322,21 @@ class WorkItemFSM(models.Model):
         # total hours spent
         hours_spent = self.hours_spent or 1
         # need to find the number of employees involved
-        # if any employees are selected, we will take the number of employees selected
-        # otherwise, we will select the number of employees in the team selected
+        # if any employees are selected, we will take the number
+        #  of employees selected
+        # otherwise, we will select the number of employees
+        #  in the team selected
         emp_count = 0
         if self.person_ids:
             emp_count += len(self.person_ids)
         elif self.team_id:
             emp_count += len(self.team_id.team_members)
         else:
-            raise exceptions.UserError(_('Please select a team or employee first !'))
+            raise exceptions.UserError(_('Please select a team '
+                                         'or employee first !'))
         if emp_count == 0:
-            raise exceptions.UserError(_('No employees are assigned to this workitem !'))
+            raise exceptions.UserError(_('No employees are'
+                                         ' assigned to this workitem !'))
 
         # finding cost needed for the service,
         #  i.e, hours_spent * hourly cost of service
@@ -341,7 +344,8 @@ class WorkItemFSM(models.Model):
         if self.hourly_cost:
             service_hourly_cost += self.hourly_cost
 
-        final_cost = (hours_spent * service_hourly_cost * emp_count) + target_cost
+        final_cost = \
+            (hours_spent * service_hourly_cost * emp_count) + target_cost
         self.final_cost = final_cost
         return False
 
@@ -359,9 +363,9 @@ class WorkItemFSM(models.Model):
         # -after finishing the job, we have to start the next job immediatly
         # for that, we are checking the parent workset is started or not
         # we will start the job only if the workset is started
-        if self.next_job_id and self.next_job_id.work_set_id and \
-                        self.next_job_id.work_set_id.work_started_flag == 'started':
-            self.status = 'ongoing'
+        if self.next_job_id and self.next_job_id.work_set_id:
+            if self.next_job_id.work_set_id.work_started_flag == 'started':
+                self.status = 'ongoing'
 
     @api.multi
     def reset_to_draft(self):
