@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import imghdr
 import json
 import functools
@@ -15,8 +13,11 @@ from odoo.modules import get_resource_path
 from odoo.http import request
 
 if hasattr(sys, 'frozen'):
-    # When running on compiled windows binary, we don't have access to package loader.
-    path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'views'))
+    # When running on compiled windows binary,
+    #  we don't have access to package loader.
+    path = \
+        os.path.realpath(os.path.join(os.path.dirname(__file__),
+                                      '..', 'views'))
     loader = jinja2.FileSystemLoader(path)
 else:
     loader = jinja2.PackageLoader('odoo.addons.odoo-debrand-12', "views")
@@ -34,10 +35,16 @@ class BinaryCustom(Binary):
     def company_logo(self, dbname=None, **kw):
         imgname = 'logo'
         imgext = '.png'
-        # Here we are changing the default logo with logo selected on debrand settings
+        # Here we are changing the default
+        #  logo with logo selected on debrand settings
         company_logo = request.env['website'].sudo().search([])[0].company_logo
         custom_logo = tools.image_resize_image(company_logo, (150, None))
-        placeholder = functools.partial(get_resource_path, 'web', 'static', 'src', 'img')
+        placeholder = \
+            functools.partial(get_resource_path,
+                              'web',
+                              'static',
+                              'src',
+                              'img')
         uid = None
         if request.session.db:
             dbname = request.session.db
@@ -58,7 +65,10 @@ class BinaryCustom(Binary):
                     image_base64 = custom_logo.decode('base64')
                     image_data = io.BytesIO(image_base64)
                     imgext = '.' + (imghdr.what(None, h=image_base64) or 'png')
-                    response = http.send_file(image_data, filename=imgname + imgext, mtime=None)
+                    response = \
+                        http.send_file(image_data,
+                                       filename=imgname + imgext,
+                                       mtime=None)
                 else:
                     with registry.cursor() as cr:
                         cr.execute("""SELECT c.logo_web, c.write_date
@@ -71,10 +81,16 @@ class BinaryCustom(Binary):
                         if row and row[0]:
                             image_base64 = str(row[0]).decode('base64')
                             image_data = io.BytesIO(image_base64)
-                            imgext = '.' + (imghdr.what(None, h=image_base64) or 'png')
-                            response = http.send_file(image_data, filename=imgname + imgext, mtime=row[1])
+                            imgext = \
+                                '.' +\
+                                (imghdr.what(None, h=image_base64) or 'png')
+                            response = \
+                                http.send_file(image_data,
+                                               filename=imgname + imgext,
+                                               mtime=row[1])
                         else:
-                            response = http.send_file(placeholder('nologo.png'))
+                            response = \
+                                http.send_file(placeholder('nologo.png'))
             except Exception:
                 response = http.send_file(placeholder(imgname + imgext))
         return response
@@ -93,7 +109,8 @@ class OdooDebrand(Database):
         d['databases'] = []
         try:
             d['databases'] = http.db_list()
-            d['incompatible_databases'] = odoo.service.db.list_db_incompatible(d['databases'])
+            d['incompatible_databases'] = \
+                odoo.service.db.list_db_incompatible(d['databases'])
         except odoo.exceptions.AccessDenied:
             monodb = db_monodb()
             if monodb:
@@ -103,7 +120,8 @@ class OdooDebrand(Database):
             website_id = request.env['website'].sudo().search([])
             d['company_name'] = website_id and website_id[0].company_name
             d['favicon_url'] = website_id and website_id[0].favicon_url or ''
-            d['company_logo_url'] = website_id and website_id[0].company_logo_url or ''
+            d['company_logo_url'] = \
+                website_id and website_id[0].company_logo_url or ''
             return env.get_template("database_manager_extend.html").render(d)
         except Exception as e:
             d['company_name'] = ''
